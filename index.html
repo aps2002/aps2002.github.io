@@ -1,1 +1,178 @@
-Hello World
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Asteroids in Space</title>
+  <style>
+    /* Apply CSS styling here */
+    body {
+      background-color: black;
+      margin: 0;
+      padding: 0;
+    }
+    svg {
+      border: 1px solid #ccc;
+    }
+    .asteroid-details {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      border-radius: 5px;
+      pointer-events: none;
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .page-button {
+      margin: 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart-container">
+  </div>
+  <div class="asteroid-details" style="display: none;"></div>
+  <div class="button-container">
+    <button class="page-button" id="prev-btn" disabled>Previous</button>
+    <button class="page-button" id="next-btn">Next</button>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+  
+
+
+    // Sample asteroid data for each page
+    const pagesData = [
+      [
+        { name: 'Asteroid 1', size: 10, distance: 50, description: 'This is the first asteroid on page 1. This is the smaller asteroid' },
+        { name: 'Asteroid 2', size: 15, distance: 100, description: 'This is the second asteroid on page 1. This is the larger asteroid.' },
+      ],
+      [
+        { name: 'Asteroid 3', size: 12, distance: 70, description: 'This is the first asteroid on page 2. This is the smaller asteroid' },
+        { name: 'Asteroid 4', size: 18, distance: 120, description: 'This is the second asteroid on page 2. This is the larger asteroid.' },
+      ],
+      [
+        { name: 'Asteroid 5', size: 8, distance: 40, description: 'This is the first asteroid on page 3. This is the smaller asteroid' },
+        { name: 'Asteroid 6', size: 20, distance: 150, description: 'This is the second asteroid on page 3. This is the larger asteroid.' },
+      ],
+      [
+        { name: 'Asteroid 7', size: 14, distance: 90, description: 'This is the first asteroid on page 4. This is the smaller asteroid' },
+        { name: 'Asteroid 8', size: 22, distance: 180, description: 'This is the second asteroid on page 4. This is the larger asteroid.' },
+      ],
+    ];
+
+    let currentPage = 0;
+    let svg; // Reference to the SVG element
+
+    // Function to generate a random color in hex format
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    // Function to generate random star positions
+function generateRandomStars(numStars) {
+  const stars = [];
+  for (let i = 0; i < numStars; i++) {
+    stars.push({
+      x: Math.random() * 800,
+      y: Math.random() * 400,
+      size: Math.random() * 2,
+      opacity: Math.random() * 0.7,
+    });
+  }
+  return stars;
+}
+
+// Function to update the chart for the current page
+function updateChart() {
+  const currentData = pagesData[currentPage];
+  // Remove previous SVG elements, if any
+  svg.selectAll('*').remove();
+
+  // Add stars to the background
+  const stars = generateRandomStars(50); // Adjust the number of stars as needed
+  svg.selectAll('.star')
+    .data(stars)
+    .enter()
+    .append('circle')
+    .attr('class', 'star')
+    .attr('cx', d => d.x)
+    .attr('cy', d => d.y)
+    .attr('r', d => d.size)
+    .style('fill', '#fff')
+    .style('opacity', d => d.opacity);
+
+  // Create new asteroids for the current page
+  const asteroids = svg.selectAll('.asteroid')
+    .data(currentData)
+    .enter()
+    .append('circle')
+    .attr('class', 'asteroid')
+    .attr('cx', () => Math.random() * 800)
+    .attr('cy', () => Math.random() * 400)
+    .attr('r', d => d.size)
+    .style('fill', getRandomColor()) // Assign a random color to each asteroid
+    .on('mouseover', showAsteroidDetails)
+    .on('mouseout', hideAsteroidDetails);
+  
+  // Rest of the code remains the same
+}
+
+
+
+    // Function to show asteroid details on hover, using parameters
+    function showAsteroidDetails(event, d) {
+      const detailsContainer = d3.select('.asteroid-details');
+      detailsContainer.html(`<h3>${d.name}</h3><p>${d.description}</p>`);
+      detailsContainer.style('display', 'block');
+    }
+
+    // Function to hide asteroid details on mouseout
+    function hideAsteroidDetails() {
+      d3.select('.asteroid-details').style('display', 'none');
+    }
+
+    // Function to update button states based on current page
+    function updateButtonStates() {
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage === pagesData.length - 1;
+    }
+
+    // Event listener for previous button
+    document.getElementById('prev-btn').addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        updateChart();
+      }
+    });
+
+    // Event listener for next button
+    document.getElementById('next-btn').addEventListener('click', () => {
+      if (currentPage < pagesData.length - 1) {
+        currentPage++;
+        updateChart();
+      }
+    });
+
+    // Initial chart setup
+    svg = d3.select('#chart-container').append('svg')
+      .attr('width', 800)
+      .attr('height', 400);
+    updateChart();
+
+
+  </script>
+</body>
+</html>
